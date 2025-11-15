@@ -18,6 +18,7 @@
     "typescript": "^5.3.0"
   },
   "dependencies": {
+    "@aws-cdk/aws-servicecatalogappregistry-alpha": "2.170.0-alpha.0",
     "aws-cdk-lib": "^2.170.0",
     "constructs": "^10.3.0"
   }

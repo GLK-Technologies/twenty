@@ -460,6 +460,69 @@ Enabled automatically with 7-day retention:
 - **ACU Usage**: If consistently < 30%, decrease `auroraMaxCapacity`
 - **Request Count**: Monitor to understand traffic patterns
 
+## Application Manager (myApplications)
+
+The deployment includes AWS Service Catalog AppRegistry integration for centralized application management.
+
+### Accessing Application Manager
+
+After deployment, view all your Twenty CRM resources in one place:
+
+```
+AWS Console → Systems Manager → Application Manager → Applications → Twenty-CRM
+```
+
+**What you'll see:**
+- All infrastructure resources grouped together
+- Cost allocation data
+- Application metadata and attributes
+- Quick navigation to all Twenty CRM components
+
+### Benefits
+
+**Unified Resource View:**
+- See all ECS services, databases, load balancers, and storage in one dashboard
+- Quick access to CloudWatch metrics and logs
+- Navigate between related resources easily
+
+**Cost Tracking:**
+- Filter AWS Cost Explorer by "Twenty-CRM" application
+- See exact monthly costs broken down by service
+- Export cost reports for budgeting
+
+**Application Metadata:**
+- Version: 1.0.0
+- Environment: production
+- Owner: jhorlin@skillfaber.com
+- Architecture: serverless (ECS Fargate + Aurora Serverless v2)
+
+### Cost Analysis
+
+To view costs specifically for Twenty CRM:
+
+1. Go to **AWS Cost Explorer**
+2. Click **Filters** → **Tag**
+3. Select tag key: `awsApplication`
+4. Select tag value: (Twenty-CRM application ARN)
+5. View costs broken down by service
+
+### CloudWatch Application Insights (Optional)
+
+Enable automated monitoring and anomaly detection:
+
+1. Go to Application Manager → Twenty-CRM
+2. Click **Enable Application Insights**
+3. Choose monitoring template (recommended: ECS + RDS)
+4. Application Insights will automatically detect issues
+
+**Features:**
+- Automated problem detection
+- Root cause analysis
+- Integration with CloudWatch Alarms
+- Pre-configured monitoring patterns
+
+**Cost:** ~$0.10/hour per resource monitored (optional feature)
+
 ## Support
 
 - **Twenty Documentation**: https://docs.twenty.com

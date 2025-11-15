@@ -1,5 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
+import * as appreg from '@aws-cdk/aws-servicecatalogappregistry-alpha';
 import { NetworkStack } from './network-stack';
 import { DatabaseStack } from './database-stack';
 import { StorageStack } from './storage-stack';
@@ -80,6 +81,55 @@ export class TwentyStack extends cdk.Stack {
       targetGroupFullName: compute.outputs.targetGroupFullName,
       alertEmail: config.alertEmail,
     });
+
+    // 6. Application Registry (myApplications)
+    // Create AppRegistry Application for centralized resource tracking
+    const application = new appreg.Application(this, 'TwentyCRMApplication', {
+      applicationName: 'Twenty-CRM',
+      description: 'Twenty CRM - Cost-optimized deployment for small teams',
+    });
+
+    // Associate this stack with the application
+    // This automatically tags all resources for cost tracking and governance
+    application.associateStack(this);
+
+    // Create attribute group for project metadata
+    const projectAttributes = new appreg.AttributeGroup(this, 'ProjectAttributes', {
+      attributeGroupName: 'Twenty-CRM-ProjectInfo',
+      description: 'Project and business metadata for Twenty CRM',
+      attributes: {
+        version: '1.0.0',
+        environment: 'production',
+        owner: config.alertEmail || 'admin',
+        team: 'Engineering',
+        project: 'Twenty CRM',
+        costCenter: 'Operations',
+      },
+    });
+
+    // Create attribute group for technical metadata
+    const technicalAttributes = new appreg.AttributeGroup(this, 'TechnicalAttributes', {
+      attributeGroupName: 'Twenty-CRM-TechnicalInfo',
+      description: 'Technical architecture metadata for Twenty CRM',
+      attributes: {
+        architecture: 'serverless',
+        components: {
+          compute: 'ECS Fargate',
+          database: 'Aurora Serverless v2',
+          cache: 'ElastiCache Redis',
+          storage: 'S3',
+          loadBalancer: 'Application Load Balancer',
+          monitoring: 'CloudWatch',
+        },
+        region: cdk.Aws.REGION,
+        managedBy: 'AWS CDK',
+        repository: 'https://github.com/GLK-Technologies/twenty',
+      },
+    });
+
+    // Associate attribute groups with the application
+    application.associateAttributeGroup(projectAttributes);
+    application.associateAttributeGroup(technicalAttributes);
 
     // Stack Outputs
     const appUrl = config.domainName
