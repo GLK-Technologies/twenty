@@ -4,6 +4,7 @@ import { NetworkStack } from './network-stack';
 import { DatabaseStack } from './database-stack';
 import { StorageStack } from './storage-stack';
 import { ComputeStack } from './compute-stack';
+import { MonitoringStack } from './monitoring-stack';
 
 export type TwentyStackConfig = {
   domainName?: string;
@@ -65,6 +66,19 @@ export class TwentyStack extends cdk.Stack {
       hostedZoneId: config.hostedZoneId,
       hostedZoneName: config.hostedZoneName,
       certificateArn: config.certificateArn,
+    });
+
+    // 5. Monitoring Infrastructure
+    const monitoring = new MonitoringStack(this, 'Monitoring', {
+      databaseCluster: database.outputs.cluster,
+      databaseClusterIdentifier: database.outputs.clusterIdentifier,
+      redisClusterId: database.outputs.redisClusterId,
+      ecsClusterName: compute.outputs.cluster.clusterName,
+      serverServiceName: compute.outputs.serverService.serviceName,
+      workerServiceName: compute.outputs.workerService.serviceName,
+      loadBalancer: compute.outputs.loadBalancer,
+      targetGroupFullName: compute.outputs.targetGroupFullName,
+      alertEmail: config.alertEmail,
     });
 
     // Stack Outputs

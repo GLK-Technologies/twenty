@@ -35,6 +35,10 @@ export type ComputeStackOutputs = {
   cluster: ecs.ICluster;
   loadBalancerDns: string;
   loadBalancerArn: string;
+  serverService: ecs.IService;
+  workerService: ecs.IService;
+  loadBalancer: elbv2.IApplicationLoadBalancer;
+  targetGroupFullName: string;
 };
 
 export class ComputeStack extends Construct {
@@ -375,6 +379,10 @@ export class ComputeStack extends Construct {
       cluster,
       loadBalancerDns: alb.loadBalancerDnsName,
       loadBalancerArn: alb.loadBalancerArn,
+      serverService,
+      workerService,
+      loadBalancer: alb,
+      targetGroupFullName: targetGroup.targetGroupFullName,
     };
   }
 }

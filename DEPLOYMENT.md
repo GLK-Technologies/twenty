@@ -377,6 +377,89 @@ Backups (snapshots) are retained for recovery.
 5. **Enable CloudTrail** for audit logging
 6. **Use HTTPS**: Set up ACM certificate and custom domain
 
+## Monitoring and Observability
+
+The deployment includes a comprehensive CloudWatch dashboard and alarms for proactive monitoring.
+
+### CloudWatch Dashboard
+
+After deployment, access your monitoring dashboard:
+
+```
+https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#dashboards:name=Twenty-CRM-Production
+```
+
+**Dashboard includes:**
+
+**Aurora Database Metrics:**
+- ACU Utilization (% of max capacity used)
+- CPU Utilization and Database Connections
+- Read/Write Latency
+- Serverless Database Capacity (actual ACU usage)
+
+**ECS Service Metrics:**
+- Server service CPU and Memory utilization
+- Worker service CPU and Memory utilization
+
+**Application Load Balancer:**
+- Request count and response times
+- HTTP status codes (2xx, 4xx, 5xx)
+- Healthy/Unhealthy target counts
+
+**Redis Cache:**
+- CPU and memory usage
+- Connection count and evictions
+
+### CloudWatch Alarms
+
+If you configured `alertEmail` in `infrastructure/bin/app.ts`, you'll receive email notifications for:
+
+1. **Aurora CPU > 90%** - Consider scaling up ACU capacity
+2. **Aurora ACU Utilization > 80%** - Increase `auroraMaxCapacity`
+3. **Server CPU > 85%** - Increase `serverCpu` in config
+4. **Worker Memory > 85%** - Increase `workerMemory` in config
+5. **No Healthy Hosts** - Service may be down
+6. **High 5xx Errors (>10 in 5 min)** - Check application logs
+7. **Response Time p99 > 2s** - Investigate performance
+8. **Redis Memory > 80%** - Consider larger instance
+
+**Email Subscription:**
+
+After first deployment, confirm the SNS email subscription sent to the configured email address.
+
+### Viewing Logs
+
+**ECS Container Logs:**
+```bash
+# Server logs
+aws logs tail /ecs/twenty-server --follow --profile glk
+
+# Worker logs
+aws logs tail /ecs/twenty-worker --follow --profile glk
+```
+
+**Aurora Database Logs:**
+
+Enabled automatically with 7-day retention:
+- PostgreSQL error logs
+- Slow query logs
+
+### Metrics to Monitor
+
+**Capacity Planning:**
+- **ACU Utilization**: If consistently > 70%, increase `auroraMaxCapacity`
+- **ECS CPU/Memory**: If > 80% regularly, scale up task resources
+- **Redis Memory**: If > 75%, upgrade to larger cache instance
+
+**Performance:**
+- **Response Time**: Target p99 < 1s for good UX
+- **Database Latency**: Should be < 10ms for most queries
+- **5xx Errors**: Should be near zero
+
+**Cost Optimization:**
+- **ACU Usage**: If consistently < 30%, decrease `auroraMaxCapacity`
+- **Request Count**: Monitor to understand traffic patterns
+
 ## Support
 
 - **Twenty Documentation**: https://docs.twenty.com

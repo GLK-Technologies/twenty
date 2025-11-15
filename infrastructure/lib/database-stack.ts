@@ -15,11 +15,13 @@ export type DatabaseStackProps = {
 
 export type DatabaseStackOutputs = {
   cluster: rds.IDatabaseCluster;
+  clusterIdentifier: string;
   clusterEndpoint: string;
   databaseName: string;
   secret: secretsmanager.ISecret;
   databaseUrlSecret: secretsmanager.ISecret;
   redisEndpoint: string;
+  redisClusterId: string;
 };
 
 export class DatabaseStack extends Construct {
@@ -149,11 +151,13 @@ export class DatabaseStack extends Construct {
 
     this.outputs = {
       cluster,
+      clusterIdentifier: cluster.clusterIdentifier,
       clusterEndpoint,
       databaseName,
       secret: databaseSecret,
       databaseUrlSecret,
       redisEndpoint,
+      redisClusterId: redisCluster.ref,
     };
   }
 }

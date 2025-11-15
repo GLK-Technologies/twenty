@@ -32,8 +32,8 @@ const config = {
   // Use Fargate Spot for cost savings (70% cheaper)
   useFargateSpot: true,
 
-  // Email for alerts (optional)
-  alertEmail: app.node.tryGetContext('alertEmail'),
+  // Email for CloudWatch alerts
+  alertEmail: 'jhorlin@skillfaber.com',
 };
 
 new TwentyStack(app, 'TwentyStack', {
