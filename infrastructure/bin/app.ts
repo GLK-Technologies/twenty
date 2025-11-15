@@ -27,7 +27,7 @@ const config = {
   serverCpu: 512,      // 0.5 vCPU
   serverMemory: 1024,  // 1 GB
   workerCpu: 256,      // 0.25 vCPU
-  workerMemory: 512,   // 512 MB
+  workerMemory: 1024,  // 1 GB (worker needs more memory for background jobs)
 
   // Use Fargate Spot for cost savings (70% cheaper)
   useFargateSpot: true,

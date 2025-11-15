@@ -41,6 +41,13 @@ if ! aws sts get-caller-identity --profile $AWS_PROFILE &> /dev/null; then
     exit 1
 fi
 
+# Check Docker daemon
+if ! docker info &> /dev/null; then
+    echo -e "${RED}Error: Docker daemon is not running${NC}"
+    echo "Please start Docker and try again"
+    exit 1
+fi
+
 echo -e "${GREEN}✓ All prerequisites met${NC}"
 echo ""
 

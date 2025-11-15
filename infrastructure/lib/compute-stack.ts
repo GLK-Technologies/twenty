@@ -9,6 +9,8 @@ import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as route53Targets from 'aws-cdk-lib/aws-route53-targets';
+import * as ecr_assets from 'aws-cdk-lib/aws-ecr-assets';
+import * as path from 'path';
 import { Construct } from 'constructs';
 
 export type ComputeStackProps = {
@@ -140,6 +142,16 @@ export class ComputeStack extends Construct {
       IS_CONFIG_VARIABLES_IN_DB_ENABLED: 'true',
     };
 
+    // Build Docker image from local source
+    const dockerImageAsset = new ecr_assets.DockerImageAsset(this, 'TwentyDockerImage', {
+      directory: path.join(__dirname, '../../'),
+      file: 'packages/twenty-docker/twenty/Dockerfile',
+      platform: ecr_assets.Platform.LINUX_AMD64,
+      buildArgs: {
+        REACT_APP_SERVER_BASE_URL: serverUrl,
+      },
+    });
+
     // Create Server Task Definition
     const serverTaskDefinition = new ecs.FargateTaskDefinition(
       this,
@@ -153,13 +165,15 @@ export class ComputeStack extends Construct {
     );
 
     const serverContainer = serverTaskDefinition.addContainer('ServerContainer', {
-      image: ecs.ContainerImage.fromRegistry('twentycrm/twenty:latest'),
+      image: ecs.ContainerImage.fromDockerImageAsset(dockerImageAsset),
       logging: ecs.LogDriver.awsLogs({
         streamPrefix: 'server',
         logGroup: serverLogGroup,
       }),
       environment: {
         ...commonEnvironment,
+        NODE_ENV: 'production',
+        DISABLE_DB_MIGRATIONS: 'false',
         DISABLE_CRON_JOBS_REGISTRATION: 'false', // Server handles cron jobs
       },
       secrets: {
@@ -193,7 +207,7 @@ export class ComputeStack extends Construct {
     );
 
     workerTaskDefinition.addContainer('WorkerContainer', {
-      image: ecs.ContainerImage.fromRegistry('twentycrm/twenty:latest'),
+      image: ecs.ContainerImage.fromDockerImageAsset(dockerImageAsset),
       command: ['yarn', 'worker:prod'],
       logging: ecs.LogDriver.awsLogs({
         streamPrefix: 'worker',
@@ -201,6 +215,7 @@ export class ComputeStack extends Construct {
       }),
       environment: {
         ...commonEnvironment,
+        NODE_ENV: 'production',
         DISABLE_DB_MIGRATIONS: 'true', // Migrations run on server
         DISABLE_CRON_JOBS_REGISTRATION: 'true', // Server handles cron jobs
       },
